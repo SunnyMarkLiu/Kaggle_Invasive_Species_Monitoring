@@ -20,12 +20,12 @@ class Configure(object):
 
     # data
     data_base_path = '/data/sunnymarkliu/kaggle/invasive_species_monitoring'
-    train_img_path = data_base_path + "/input/train/original/"
-    train_labels_path = data_base_path + "/input/train/train_labels.csv"
-    test_img_path = data_base_path + "/input/test/original/"
+    train_img_path = data_base_path + "/train/original/"
+    train_labels_path = data_base_path + "/train/train_labels.csv"
+    test_img_path = data_base_path + "/test/original/"
 
-    train_labels_0_img_path = data_base_path + "/input/train/labels_0/"
-    train_labels_1_img_path = data_base_path + "/input/train/labels_1/"
+    train_labels_0_img_path = data_base_path + "/train/labels_0/"
+    train_labels_1_img_path = data_base_path + "/train/labels_1/"
 
     # models
     alexnet_image_width, alexnet_image_height = 224, 224
