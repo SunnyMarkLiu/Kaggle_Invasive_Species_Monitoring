@@ -18,11 +18,18 @@ import time
 class Configure(object):
     """global config"""
 
-    train_img_path = module_path + "/input/train/"
-    train_labels_path = module_path + "/input/train_labels.csv"
-    test_img_path = module_path + "/input/test/"
+    # data
+    data_base_path = '/data/sunnymarkliu/kaggle/invasive_species_monitoring'
+    train_img_path = data_base_path + "/input/train/original/"
+    train_labels_path = data_base_path + "/input/train/train_labels.csv"
+    test_img_path = data_base_path + "/input/test/original/"
 
-    train_labels_0_img_path = module_path + "/input/train/labels_0/"
-    train_labels_1_img_path = module_path + "/input/train/labels_1/"
+    train_labels_0_img_path = data_base_path + "/input/train/labels_0/"
+    train_labels_1_img_path = data_base_path + "/input/train/labels_1/"
 
+    # models
+    alexnet_image_width, alexnet_image_height = 224, 224
+    vgg_image_width, vgg_image_height = 224, 224
+
+    # result
     submission_path = '../result/submission_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time())))
