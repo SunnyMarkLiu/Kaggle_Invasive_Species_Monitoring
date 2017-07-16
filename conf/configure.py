@@ -27,9 +27,14 @@ class Configure(object):
     train_labels_0_img_path = data_base_path + "/train/labels_0/"
     train_labels_1_img_path = data_base_path + "/train/labels_1/"
 
+    trainable_train_labels_0_img_path = data_base_path + "/train/labels_0/trainable/image_size_{}/"
+    trainable_train_labels_1_img_path = data_base_path + "/train/labels_1/trainable/image_size_{}/"
+
+    testable_test_img_path = data_base_path + "/test/original/testable/image_size_{}/"
+
     # models
-    alexnet_image_width, alexnet_image_height = 224, 224
-    vgg_image_width, vgg_image_height = 224, 224
+    alexnet__size = 224
+    vgg_image_size = 224
 
     # result
     submission_path = '../result/submission_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time())))

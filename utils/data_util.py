@@ -3,8 +3,10 @@
 
 """
 @author: MarkLiu
-@time  : 17-6-20 上午10:46
+@time  : 17-6-20 下午2:11
 """
+from __future__ import absolute_import, division, print_function
+
 import os
 import sys
 
@@ -13,54 +15,117 @@ sys.path.append(module_path)
 
 import numpy as np
 import cv2
+
 from conf.configure import Configure
 
-
-def centering_image(img):
-    size = [256, 256]
-    img_size = img.shape[:2]
-    # centering
-    row = (size[1] - img_size[0]) // 2
-    col = (size[0] - img_size[1]) // 2
-    resized = np.zeros(list(size) + [img.shape[2]], dtype=np.uint8)
-    resized[row:(row + img.shape[0]), col:(col + img.shape[1])] = img
-    return resized
+imagenet_mean = {'R': 103.939,
+                 'G': 116.779,
+                 'B': 123.68}
 
 
-def image_data_preprocess(image_dir):
-    """image reseize & centering & crop"""
+def load_train_data():
+    """加载处理后的训练集"""
+    train_x = []
+    train_y = []
 
-    image_paths = os.listdir(image_dir)
-
-    for i, image_path in enumerate(image_paths):
-        image_file = image_dir + image_path
-        # read image
-        img = cv2.imread(image_dir + image_path)
+    base_path = Configure.train_labels_0_img_path
+    images = os.listdir(base_path)
+    for image_path in images:
+        image_path = base_path + image_path
+        img = cv2.imread(image_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = np.array(img, dtype=np.float16)
+        img[:, :, 0] -= imagenet_mean['R']
+        img[:, :, 1] -= imagenet_mean['G']
+        img[:, :, 2] -= imagenet_mean['B']
 
-        # resize
-        if img.shape[0] > img.shape[1]:
-            tile_size = (int(img.shape[1] * 256 / img.shape[0]), 256)
-        else:
-            tile_size = (256, int(img.shape[0] * 256 / img.shape[1]))
+        train_x.append(img)
+        train_y.append(0)
 
-        # centering
-        img = centering_image(cv2.resize(img, dsize=tile_size))
+    base_path = Configure.train_labels_1_img_path
+    images = os.listdir(base_path)
+    for image_path in images:
+        image_path = base_path + image_path
+        img = cv2.imread(image_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = np.array(img, dtype=np.float16)
+        img[:, :, 0] -= imagenet_mean['R']
+        img[:, :, 1] -= imagenet_mean['G']
+        img[:, :, 2] -= imagenet_mean['B']
 
-        # output 224*224px
-        img = img[16:240, 16:240]
+        train_x.append(img)
+        train_y.append(1)
 
-        # save image
-        cv2.imwrite(image_file, img)
+    train_x = np.array(train_x)
+    train_y = np.array(train_y)
+    train_y = train_y.reshape((train_y.shape[0], 1))
+
+    return train_x, train_y
 
 
-def main():
-    print('image reseize & centering & crop...')
-    image_data_preprocess(Configure.train_labels_1_img_path)
-    image_data_preprocess(Configure.train_labels_0_img_path)
-    image_data_preprocess(Configure.test_img_path)
-    print('Done!')
+def load_test_data():
+    """加载处理后的测试集"""
+    test_x = []
+    test_name = []
 
+    base_path = Configure.test_img_path
+    images = os.listdir(base_path)
+    for image_path in images:
+        test_name.append(int(image_path.split('.')[0]))
+        image_path = base_path + image_path
+        img = cv2.imread(image_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = np.array(img, dtype=np.float16)
+        img[:, :, 0] -= imagenet_mean['R']
+        img[:, :, 1] -= imagenet_mean['G']
+        img[:, :, 2] -= imagenet_mean['B']
+
+        test_x.append(img)
+
+    test_name = np.array(test_name)
+    test_x = np.array(test_x)
+    return test_name, test_x
+
+
+class DataWapper(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.pointer = 0
+        self.total_count = self.x.shape[0]
+
+    def shuffle(self):
+        shuffled_index = np.arange(0, self.total_count)
+        np.random.shuffle(shuffled_index)
+        self.x = self.x[shuffled_index]
+        self.y = self.y[shuffled_index]
+
+    def next_batch(self, batch_size):
+        end = self.pointer + batch_size
+        if end > self.total_count:
+            end = self.total_count
+
+        batch_x = self.x[self.pointer: end]
+        batch_y = self.y[self.pointer: end]
+
+        self.pointer = end
+
+        if self.pointer == self.total_count:
+            self.shuffle()
+            self.pointer = 0
+
+        return batch_x, batch_y
+
+def test():
+    train_x, train_y = load_train_data()
+    data_wapper = DataWapper(train_x, train_y)
+    data_wapper.shuffle()
+
+    batch_x, batch_y = data_wapper.next_batch(20)
+
+    print(batch_x.shape)
+    print(batch_y.shape)
+    print(batch_y)
 
 if __name__ == '__main__':
-    main()
+    test()
