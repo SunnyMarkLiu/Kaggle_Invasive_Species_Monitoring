@@ -18,6 +18,7 @@ from keras import applications
 from keras import backend as K
 from keras.utils import plot_model
 from utils import data_util
+import keras
 
 
 def main():
@@ -53,10 +54,19 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
                   metrics=['accuracy'])
-
+    print(model.summary())
     plot_model(model, to_file='vgg16_model.png')
 
     print '========== start training =========='
+    epochs = 100
+    batch_size = 100
+    train_x, train_y = data_wapper.load_all_data()
+    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    model.fit(train_x, train_y, batch_size=batch_size,
+              epochs=epochs, verbose=1,
+              validation_split=0.2,
+              shuffle=True,
+              callbacks=[earlystop])
 
 
 if __name__ == '__main__':

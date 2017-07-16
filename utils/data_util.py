@@ -11,8 +11,8 @@ import sys
 module_path = os.path.abspath(os.path.join('..'))
 sys.path.append(module_path)
 from keras.applications.imagenet_utils import preprocess_input
+from keras.preprocessing import image
 import numpy as np
-import cv2
 
 from conf.configure import Configure
 
@@ -48,12 +48,16 @@ class DataWapper(object):
         self.y = train_y
         self.pointer = 0
         self.total_count = self.x.shape[0]
+        self.shuffle()
 
     def shuffle(self):
         shuffled_index = np.arange(0, self.total_count)
         np.random.shuffle(shuffled_index)
         self.x = self.x[shuffled_index]
         self.y = self.y[shuffled_index]
+
+    def load_all_data(self):
+        return self.next_batch(self.x.shape[0])
 
     def next_batch(self, batch_size):
         end = self.pointer + batch_size
@@ -65,9 +69,11 @@ class DataWapper(object):
 
         x = []
         for img_path in batch_x:
-            img = cv2.imread(img_path).astype(np.float16)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = image.load_img(img_path, target_size=(224, 224))
+            img = image.img_to_array(img)
+            img = np.expand_dims(img, axis=0)
             img = preprocess_input(img)
+            img = img[0]
             x.append(img)
 
         self.pointer = end
@@ -82,7 +88,6 @@ class DataWapper(object):
 
 def test():
     data_wapper = DataWapper(image_size=224)
-    data_wapper.shuffle()
     batch_x, batch_y = data_wapper.next_batch(20)
 
     print batch_x.shape
