@@ -31,6 +31,9 @@ def load_pre_train_data():
 def move_train_data():
     """将 train data 按照 labels 进行分割 """
 
+    if len(os.listdir(Configure.train_img_path)) == 0:
+        return
+
     import shutil
     train_images, labels = load_pre_train_data()
     df_train_images = pd.DataFrame({"train_images": train_images,
