@@ -10,15 +10,11 @@ import sys
 
 module_path = os.path.abspath(os.path.join('..'))
 sys.path.append(module_path)
-
+from keras.applications.imagenet_utils import preprocess_input
 import numpy as np
 import cv2
 
 from conf.configure import Configure
-
-imagenet_mean = {'R': 103.939,
-                 'G': 116.779,
-                 'B': 123.68}
 
 
 def load_train_data(image_size):
@@ -71,9 +67,7 @@ class DataWapper(object):
         for img_path in batch_x:
             img = cv2.imread(img_path).astype(np.float16)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img[:, :, 0] -= imagenet_mean['R']
-            img[:, :, 1] -= imagenet_mean['G']
-            img[:, :, 2] -= imagenet_mean['B']
+            img = preprocess_input(img)
             x.append(img)
 
         self.pointer = end
