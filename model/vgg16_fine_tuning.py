@@ -44,7 +44,7 @@ def main():
     top_model = Dropout(0.5)(top_model)
     top_model = Dense(256, activation='relu', name='fc2')(top_model)
     top_model = Dropout(0.5)(top_model)
-    top_model = Dense(1, activation='softmax', name='predictions')(top_model)
+    top_model = Dense(1, activation='sigmoid', name='predictions')(top_model)
 
     model = Model(input=image_input, output=top_model, name='vgg16')
 
