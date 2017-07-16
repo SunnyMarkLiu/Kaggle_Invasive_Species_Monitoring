@@ -5,8 +5,6 @@
 @author: MarkLiu
 @time  : 17-6-20 下午2:11
 """
-from __future__ import absolute_import, division, print_function
-
 import os
 import sys
 
@@ -23,38 +21,21 @@ imagenet_mean = {'R': 103.939,
                  'B': 123.68}
 
 
-def load_train_data():
+def load_train_data(image_size):
     """加载处理后的训练集"""
     train_x = []
-    train_y = []
 
-    base_path = Configure.train_labels_0_img_path
+    base_path = Configure.trainable_train_labels_0_img_path.format(image_size)
     images = os.listdir(base_path)
-    for image_path in images:
-        image_path = base_path + image_path
-        img = cv2.imread(image_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.array(img, dtype=np.float16)
-        img[:, :, 0] -= imagenet_mean['R']
-        img[:, :, 1] -= imagenet_mean['G']
-        img[:, :, 2] -= imagenet_mean['B']
+    images = [base_path + image for image in images]
+    train_x.extend(images)
+    train_y = [0] * len(images)
 
-        train_x.append(img)
-        train_y.append(0)
-
-    base_path = Configure.train_labels_1_img_path
+    base_path = Configure.trainable_train_labels_1_img_path.format(image_size)
     images = os.listdir(base_path)
-    for image_path in images:
-        image_path = base_path + image_path
-        img = cv2.imread(image_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.array(img, dtype=np.float16)
-        img[:, :, 0] -= imagenet_mean['R']
-        img[:, :, 1] -= imagenet_mean['G']
-        img[:, :, 2] -= imagenet_mean['B']
-
-        train_x.append(img)
-        train_y.append(1)
+    images = [base_path + image for image in images]
+    train_x.extend(images)
+    train_y.extend([1] * len(images))
 
     train_x = np.array(train_x)
     train_y = np.array(train_y)
@@ -63,34 +44,12 @@ def load_train_data():
     return train_x, train_y
 
 
-def load_test_data():
-    """加载处理后的测试集"""
-    test_x = []
-    test_name = []
-
-    base_path = Configure.test_img_path
-    images = os.listdir(base_path)
-    for image_path in images:
-        test_name.append(int(image_path.split('.')[0]))
-        image_path = base_path + image_path
-        img = cv2.imread(image_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.array(img, dtype=np.float16)
-        img[:, :, 0] -= imagenet_mean['R']
-        img[:, :, 1] -= imagenet_mean['G']
-        img[:, :, 2] -= imagenet_mean['B']
-
-        test_x.append(img)
-
-    test_name = np.array(test_name)
-    test_x = np.array(test_x)
-    return test_name, test_x
-
-
 class DataWapper(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, image_size):
+        self.image_size = image_size
+        train_x, train_y = load_train_data(image_size=224)
+        self.x = train_x
+        self.y = train_y
         self.pointer = 0
         self.total_count = self.x.shape[0]
 
@@ -106,7 +65,16 @@ class DataWapper(object):
             end = self.total_count
 
         batch_x = self.x[self.pointer: end]
-        batch_y = self.y[self.pointer: end]
+        y = self.y[self.pointer: end]
+
+        x = []
+        for img_path in batch_x:
+            img = cv2.imread(img_path).astype(np.float16)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img[:, :, 0] -= imagenet_mean['R']
+            img[:, :, 1] -= imagenet_mean['G']
+            img[:, :, 2] -= imagenet_mean['B']
+            x.append(img)
 
         self.pointer = end
 
@@ -114,18 +82,19 @@ class DataWapper(object):
             self.shuffle()
             self.pointer = 0
 
-        return batch_x, batch_y
+        x = np.array(x)
+        return x, y
+
 
 def test():
-    train_x, train_y = load_train_data()
-    data_wapper = DataWapper(train_x, train_y)
+    data_wapper = DataWapper(image_size=224)
     data_wapper.shuffle()
-
     batch_x, batch_y = data_wapper.next_batch(20)
 
-    print(batch_x.shape)
-    print(batch_y.shape)
-    print(batch_y)
+    print batch_x.shape
+    print batch_y.shape
+    print batch_y
+
 
 if __name__ == '__main__':
     test()
