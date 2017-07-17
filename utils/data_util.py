@@ -23,13 +23,13 @@ def load_train_data(image_size):
 
     base_path = Configure.trainable_train_labels_0_img_path.format(image_size)
     images = os.listdir(base_path)
-    images = [base_path + image for image in images]
+    images = [base_path + img for img in images]
     train_x.extend(images)
     train_y = [0] * len(images)
 
     base_path = Configure.trainable_train_labels_1_img_path.format(image_size)
     images = os.listdir(base_path)
-    images = [base_path + image for image in images]
+    images = [base_path + img for img in images]
     train_x.extend(images)
     train_y.extend([1] * len(images))
 
@@ -40,12 +40,30 @@ def load_train_data(image_size):
     return train_x, train_y
 
 
+def load_test_data(image_size):
+    test_x = []
+
+    base_path = Configure.testable_test_img_path.format(image_size)
+    images = os.listdir(base_path)
+    images = [base_path + image for image in images]
+    test_x.extend(images)
+    test_x = np.array(test_x)
+
+    return test_x
+
+
 class DataWapper(object):
-    def __init__(self, image_size):
+    def __init__(self, image_size, istrain):
         self.image_size = image_size
-        train_x, train_y = load_train_data(image_size=224)
-        self.x = train_x
-        self.y = train_y
+        self.istrain = istrain
+        if self.istrain:
+            train_x, train_y = load_train_data(image_size=image_size)
+            self.x = train_x
+            self.y = train_y
+        else:
+            test_x = load_test_data(image_size=image_size)
+            self.x = test_x
+
         self.pointer = 0
         self.total_count = self.x.shape[0]
         self.shuffle()
@@ -53,8 +71,11 @@ class DataWapper(object):
     def shuffle(self):
         shuffled_index = np.arange(0, self.total_count)
         np.random.shuffle(shuffled_index)
-        self.x = self.x[shuffled_index]
-        self.y = self.y[shuffled_index]
+        if self.istrain:
+            self.x = self.x[shuffled_index]
+            self.y = self.y[shuffled_index]
+        else:
+            self.x = self.x[shuffled_index]
 
     def load_all_data(self):
         return self.next_batch(self.x.shape[0])
@@ -65,7 +86,9 @@ class DataWapper(object):
             end = self.total_count
 
         batch_x = self.x[self.pointer: end]
-        y = self.y[self.pointer: end]
+
+        if self.istrain:
+            y = self.y[self.pointer: end]
 
         x = []
         for img_path in batch_x:
@@ -83,11 +106,16 @@ class DataWapper(object):
             self.pointer = 0
 
         x = np.array(x)
-        return x, y
+
+        if self.istrain:
+            return x, y
+        else:
+            self.x = [name.split('/')[-1].split('.')[0] for name in self.x]
+            return self.x, x
 
 
 def test():
-    data_wapper = DataWapper(image_size=224)
+    data_wapper = DataWapper(image_size=224, istrain=True)
     batch_x, batch_y = data_wapper.next_batch(20)
 
     print batch_x.shape
