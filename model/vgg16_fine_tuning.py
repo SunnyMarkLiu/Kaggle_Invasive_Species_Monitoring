@@ -16,7 +16,7 @@ from keras.layers import Input, Dropout, Flatten, Dense
 from keras import optimizers
 from keras import applications
 from keras import backend as K
-from keras.utils import plot_model
+# from keras.utils import plot_model
 import keras
 from utils import data_util
 import pandas as pd
@@ -26,7 +26,9 @@ from conf.configure import Configure
 
 def main():
     image_size = 224
+    # all train data
     train_x_image_path, train_y = data_util.load_train_data(image_size=image_size)
+    # split train/validate
     train_X, validate_X, train_y, validate_y = train_test_split(train_x_image_path,
                                                                 train_y,
                                                                 test_size=0.2,
@@ -63,12 +65,15 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
-    print(model.summary())
-    plot_model(model, to_file='vgg16_model.png')
+    # print(model.summary())
+    # plot_model(model, to_file='vgg16_model.png')
 
     print '========== start training =========='
+    print 'training data size: ', train_X.shape[0]
+    print 'validate data size: ', validate_X.shape[0]
+
     epochs = 100
-    batch_size = 100
+    batch_size = 50
     validate_X, validate_y = validate_data_wapper.load_all_data()
 
     def data_generator(gen_batch_size):
@@ -87,9 +92,10 @@ def main():
 
     print '========== start predicting =========='
     # predict
+    # all test data
     test_image_name, test_x = data_util.load_test_data(image_size)
-    data_wapper = data_util.DataWapper(test_x, istrain=False)
-    test_x, _ = data_wapper.load_all_data()
+    test_data_wapper = data_util.DataWapper(test_x, istrain=False)
+    test_x, _ = test_data_wapper.load_all_data()
 
     predict = model.predict(test_x, batch_size=100, verbose=1)
     predict = predict[:, 0]
