@@ -17,14 +17,22 @@ from keras import optimizers
 from keras import applications
 from keras import backend as K
 from keras.utils import plot_model
-from utils import data_util
 import keras
+from utils import data_util
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from conf.configure import Configure
 
 
 def main():
-    data_wapper = data_util.DataWapper(image_size=224, istrain=True)
+    image_size = 224
+    train_x_image_path, train_y = data_util.load_train_data(image_size=image_size)
+    train_X, validate_X, train_y, validate_y = train_test_split(train_x_image_path,
+                                                                train_y,
+                                                                test_size=0.2,
+                                                                random_state=0)
+    train_data_wapper = data_util.DataWapper(train_X, train_y, istrain=True)
+    validate_data_wapper = data_util.DataWapper(validate_X, validate_y, istrain=True)
 
     if K.image_data_format() == 'channels_first':  # theano
         input_shape = (3, 224, 224)
@@ -61,17 +69,27 @@ def main():
     print '========== start training =========='
     epochs = 100
     batch_size = 100
-    train_x, train_y = data_wapper.load_all_data()
-    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
-    model.fit(train_x, train_y, batch_size=batch_size,
-              epochs=epochs, verbose=1,
-              validation_split=0.2,
-              shuffle=True,
-              callbacks=[earlystop])
+    validate_X, validate_y = validate_data_wapper.load_all_data()
 
+    def data_generator(gen_batch_size):
+        while 1:
+            batch_x, batch_y = train_data_wapper.next_batch(gen_batch_size)
+            yield batch_x, batch_y
+
+    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    model.fit_generator(
+        data_generator(gen_batch_size=batch_size),
+        steps_per_epoch=train_X.shape[0] // batch_size,
+        epochs=epochs, verbose=1,
+        validation_data=(validate_X, validate_y),
+        callbacks=[earlystop]
+    )
+
+    print '========== start predicting =========='
     # predict
-    data_wapper = data_util.DataWapper(image_size=224, istrain=False)
-    test_image_name, test_x = data_wapper.load_all_data()
+    test_image_name, test_x = data_util.load_test_data(image_size)
+    data_wapper = data_util.DataWapper(test_x, istrain=False)
+    test_x, _ = data_wapper.load_all_data()
 
     predict = model.predict(test_x, batch_size=100, verbose=1)
     predict = predict[:, 0]
