@@ -83,6 +83,10 @@ def aug_train_image(src_img_dir, dest_img_dir, augment_multiple):
 
         img = cv2.imread(src_img_dir + image_name)
 
+        # save primary image
+        save_path = dest_img_dir + image_name
+        cv2.imwrite(save_path, img)
+
         for j in range(augment_multiple + 1):
             img = transform_image(img, 20, 10, 5, brightness=1)
             save_path = dest_img_dir + 'aug_' + str(j+1) + '_' + image_name
