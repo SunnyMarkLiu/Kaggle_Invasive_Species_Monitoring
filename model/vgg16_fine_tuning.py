@@ -12,11 +12,11 @@ module_path = os.path.abspath(os.path.join('..'))
 sys.path.append(module_path)
 
 from keras.models import Model
-from keras.layers import Input, Dropout, Flatten, Dense
+from keras.layers import Input, Dropout, Flatten, Dense, BatchNormalization
 from keras import optimizers
 from keras import applications
 from keras import backend as K
-# from keras.utils import plot_model
+from keras.utils import plot_model
 import keras
 from utils import data_util
 import pandas as pd
@@ -31,7 +31,7 @@ def main():
     # split train/validate
     train_X, validate_X, train_y, validate_y = train_test_split(train_x_image_path,
                                                                 train_y,
-                                                                test_size=0.2,
+                                                                test_size=0.1,
                                                                 random_state=0)
     train_data_wapper = data_util.DataWapper(train_X, train_y, istrain=True)
     validate_data_wapper = data_util.DataWapper(validate_X, validate_y, istrain=True)
@@ -52,10 +52,13 @@ def main():
 
     # build a classifier model to put on top of the convolutional model
     top_model = Flatten(name='flatten')(model.output)
+    top_model = BatchNormalization()(top_model)
     top_model = Dense(256, activation='relu', name='fc1')(top_model)
     top_model = Dropout(0.2)(top_model)
+    top_model = BatchNormalization()(top_model)
     top_model = Dense(256, activation='relu', name='fc2')(top_model)
     top_model = Dropout(0.2)(top_model)
+    top_model = BatchNormalization()(top_model)
     top_model = Dense(1, activation='sigmoid', name='predictions')(top_model)
 
     model = Model(input=image_input, output=top_model, name='vgg16')
@@ -65,8 +68,8 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
-    # print(model.summary())
-    # plot_model(model, to_file='vgg16_model.png')
+    print(model.summary())
+    plot_model(model, to_file='vgg16_model.png')
 
     print '========== start training =========='
     print 'training data size: ', train_X.shape[0]
