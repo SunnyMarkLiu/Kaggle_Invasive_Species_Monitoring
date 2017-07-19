@@ -35,9 +35,11 @@ def aug_train_image(src_img_dir, dest_img_dir):
         rows, cols = img.shape[:2]
 
         # 水平垂直移动
-        H = np.float32([[1, 0, np.random.randint(1, 50)], [0, 1, np.random.randint(1, 50)]])
+        h = np.random.randint(1, 50)
+        w = np.random.randint(1, 50)
+        H = np.float32([[1, 0, h], [0, 1, w]])
         res = cv2.warpAffine(img, H, (rows, cols))  # 需要图像、变换矩阵、变换后的大小
-        save_path = dest_img_dir + 'aug_translate_' + image_name
+        save_path = dest_img_dir + 'aug_translate_{}_{}_'.format(h, w) + image_name
         cv2.imwrite(save_path, res)
 
         # 旋转
