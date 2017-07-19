@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-echo '========== move train data =========='
+echo '============= move train data ============'
 python move_train_data.py
-echo '=========== resize images ==========='
+echo '============== resize images ============='
 python resize_images.py
+echo '=========== image augmentation ==========='
+python image_augmentation.py
