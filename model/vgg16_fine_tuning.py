@@ -12,11 +12,12 @@ module_path = os.path.abspath(os.path.join('..'))
 sys.path.append(module_path)
 
 from keras.models import Model
-from keras.layers import Input, Dropout, Flatten, Dense, BatchNormalization
-from keras import optimizers
+from keras.layers import Input, Dropout, Flatten, Dense
+from keras import optimizers, regularizers
 from keras import applications
 from keras import backend as K
-from keras.utils import plot_model
+# from keras.utils import plot_model
+from sklearn.metrics import roc_auc_score
 import keras
 from utils import data_util
 import pandas as pd
@@ -52,13 +53,10 @@ def main():
 
     # build a classifier model to put on top of the convolutional model
     top_model = Flatten(name='flatten')(model.output)
-    top_model = BatchNormalization()(top_model)
-    top_model = Dense(256, activation='relu', name='fc1')(top_model)
-    top_model = Dropout(0.2)(top_model)
-    top_model = BatchNormalization()(top_model)
-    top_model = Dense(256, activation='relu', name='fc2')(top_model)
-    top_model = Dropout(0.2)(top_model)
-    top_model = BatchNormalization()(top_model)
+    top_model = Dense(256, activation='relu', name='fc1', kernel_regularizer=regularizers.l2(5e-4))(top_model)
+    top_model = Dropout(0.5)(top_model)
+    top_model = Dense(64, activation='relu', name='fc2', kernel_regularizer=regularizers.l2(5e-4))(top_model)
+    top_model = Dropout(0.5)(top_model)
     top_model = Dense(1, activation='sigmoid', name='predictions')(top_model)
 
     model = Model(input=image_input, output=top_model, name='vgg16')
@@ -68,15 +66,15 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
-    print(model.summary())
-    plot_model(model, to_file='vgg16_model.png')
+    # print(model.summary())
+    # plot_model(model, to_file='vgg16_model.png')
 
     print '========== start training =========='
     print 'training data size: ', train_X.shape[0]
     print 'validate data size: ', validate_X.shape[0]
 
     epochs = 100
-    batch_size = 50
+    batch_size = 32
     validate_X, validate_y = validate_data_wapper.load_all_data()
 
     def data_generator(gen_batch_size):
@@ -92,6 +90,11 @@ def main():
         validation_data=(validate_X, validate_y),
         callbacks=[earlystop]
     )
+
+    print '========== start validating =========='
+    predict = model.predict(validate_X, batch_size=100, verbose=1)
+    val_roc = roc_auc_score(validate_y, predict)
+    print 'validate roc_auc_score =', val_roc
 
     print '========== start predicting =========='
     # predict
