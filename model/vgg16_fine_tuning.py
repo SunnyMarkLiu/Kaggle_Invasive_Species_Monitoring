@@ -88,7 +88,8 @@ def main():
     checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.vgg16_best_model_weights,
                                                               lr_decay=0.9,
                                                               monitor='val_loss', verbose=0,
-                                                              save_best_only=True, mode='min')
+                                                              save_best_only=True, mode='min',
+                                                              patience=3)
 
     model.fit_generator(
         data_generator(gen_batch_size=batch_size),

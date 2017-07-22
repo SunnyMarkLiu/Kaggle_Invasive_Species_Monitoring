@@ -55,7 +55,7 @@ class ModelCheckpointAndLearningRateDecay(Callback):
 
     def __init__(self, filepath, lr_decay=0.9, monitor='val_loss', verbose=0,
                  save_best_only=False, save_weights_only=False,
-                 mode='auto', period=1, patience=5):
+                 mode='auto', period=1, patience=3):
         super(ModelCheckpointAndLearningRateDecay, self).__init__()
         self.monitor = monitor
         self.verbose = verbose
