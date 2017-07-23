@@ -50,11 +50,12 @@ class ModelCheckpointAndLearningRateDecay(Callback):
             saved (`model.save_weights(filepath)`), else the full model
             is saved (`model.save(filepath)`).
         period: Interval (number of epochs) between checkpoints.
+        patience: spectfic the count that `monitor` didn't improve, then update learning reate
     """
 
     def __init__(self, filepath, lr_decay=0.9, monitor='val_loss', verbose=0,
                  save_best_only=False, save_weights_only=False,
-                 mode='auto', period=1):
+                 mode='auto', period=1, patience=5):
         super(ModelCheckpointAndLearningRateDecay, self).__init__()
         self.monitor = monitor
         self.verbose = verbose
@@ -64,6 +65,8 @@ class ModelCheckpointAndLearningRateDecay(Callback):
         self.save_weights_only = save_weights_only
         self.period = period
         self.epochs_since_last_save = 0
+        self.patience = patience
+        self.patience_index = 0
 
         if mode not in ['auto', 'min', 'max']:
             warnings.warn('ModelCheckpoint mode %s is unknown, '
@@ -104,6 +107,8 @@ class ModelCheckpointAndLearningRateDecay(Callback):
                                   % (epoch, self.monitor, self.best,
                                      current, filepath))
                         self.best = current
+                        # clear patience_index
+                        self.patience_index = 0
                         if self.save_weights_only:
                             self.model.save_weights(filepath, overwrite=True)
                         else:
@@ -112,13 +117,19 @@ class ModelCheckpointAndLearningRateDecay(Callback):
                     else:
                         # update learning rate
                         if epoch > 0:
-                            old_lr = K.get_value(self.model.optimizer.lr)
-                            new_lr = self.lr_decay * old_lr
-                            K.set_value(self.model.optimizer.lr, new_lr)
-                            print('\nEpoch %05d: %s did not improve' %
-                                  (epoch, self.monitor))
-                            print('Epoch %05d: change learning rate from %0.5f to %0.5f'
-                                  % (epoch, old_lr, K.get_value(self.model.optimizer.lr)))
+                            # didn't improve
+                            self.patience_index += 1
+                            if self.patience_index >= self.patience:
+                                old_lr = K.get_value(self.model.optimizer.lr)
+                                new_lr = self.lr_decay * old_lr
+                                K.set_value(self.model.optimizer.lr, new_lr)
+                                print('\nEpoch %05d: %s did not improve' %
+                                      (epoch, self.monitor))
+                                print('Epoch %05d: change learning rate from %f to %f'
+                                      % (epoch, old_lr, K.get_value(self.model.optimizer.lr)))
+                                # clear patience_index
+                                self.patience_index = 0
+
             else:
                 if self.verbose > 0:
                     print('\nEpoch %05d: saving model to %s' % (epoch, filepath))
