@@ -16,8 +16,10 @@ from keras.layers import Input, Dropout, Flatten, Dense
 from keras import optimizers, regularizers
 from keras import applications
 from keras import backend as K
-# from keras.utils import plot_model
+from keras.utils import plot_model
 from sklearn.metrics import roc_auc_score
+# from keras.callbacks import LearningRateScheduler
+from keras.callbacks import ModelCheckpoint
 import keras
 from utils import data_util
 import pandas as pd
@@ -55,7 +57,7 @@ def main():
     top_model = Flatten(name='flatten')(model.output)
     top_model = Dense(256, activation='relu', name='fc1', kernel_regularizer=regularizers.l2(5e-4))(top_model)
     top_model = Dropout(0.5)(top_model)
-    top_model = Dense(64, activation='relu', name='fc2', kernel_regularizer=regularizers.l2(5e-4))(top_model)
+    top_model = Dense(256, activation='relu', name='fc2', kernel_regularizer=regularizers.l2(5e-4))(top_model)
     top_model = Dropout(0.5)(top_model)
     top_model = Dense(1, activation='sigmoid', name='predictions')(top_model)
 
@@ -66,15 +68,15 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
-    # print(model.summary())
-    # plot_model(model, to_file='vgg16_model.png')
+    print(model.summary())
+    plot_model(model, to_file='vgg16_model.png')
 
     print '========== start training =========='
     print 'training data size: ', train_X.shape[0]
     print 'validate data size: ', validate_X.shape[0]
 
     epochs = 100
-    batch_size = 32
+    batch_size = 50
     validate_X, validate_y = validate_data_wapper.load_all_data()
 
     def data_generator(gen_batch_size):
@@ -83,14 +85,20 @@ def main():
             yield batch_x, batch_y
 
     earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    checkpoint = ModelCheckpoint(Configure.vgg16_best_model_weights,
+                                 monitor='val_loss', verbose=1,
+                                 save_best_only=True, mode='min')
+
     model.fit_generator(
         data_generator(gen_batch_size=batch_size),
         steps_per_epoch=train_X.shape[0] // batch_size,
         epochs=epochs, verbose=1,
         validation_data=(validate_X, validate_y),
-        callbacks=[earlystop]
+        callbacks=[earlystop, checkpoint]
     )
 
+    print '============ load weights ============'
+    model.load_weights(Configure.vgg16_best_model_weights)
     print '========== start validating =========='
     predict = model.predict(validate_X, batch_size=100, verbose=1)
     val_roc = roc_auc_score(validate_y, predict)

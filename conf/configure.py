@@ -36,5 +36,7 @@ class Configure(object):
     alexnet__size = 224
     vgg_image_size = 224
 
+    vgg16_best_model_weights = '../result/vgg16_best_model_weights.hdf5'
+
     # result
     submission_path = '../result/submission_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time())))
