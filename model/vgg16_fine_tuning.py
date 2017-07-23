@@ -87,7 +87,7 @@ def main():
     earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
     checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.vgg16_best_model_weights,
                                                               lr_decay=0.9,
-                                                              monitor='val_loss', verbose=1,
+                                                              monitor='val_loss', verbose=0,
                                                               save_best_only=True, mode='min')
 
     model.fit_generator(

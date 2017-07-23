@@ -110,14 +110,13 @@ class ModelCheckpointAndLearningRateDecay(Callback):
                             self.model.save(filepath, overwrite=True)
 
                     else:
-                        if self.verbose > 0:
-                            print('\nEpoch %05d: %s did not improve' %
-                                  (epoch, self.monitor))
                         # update learning rate
                         if epoch > 0:
                             old_lr = K.get_value(self.model.optimizer.lr)
                             new_lr = self.lr_decay * old_lr
                             K.set_value(self.model.optimizer.lr, new_lr)
+                            print('\nEpoch %05d: %s did not improve' %
+                                  (epoch, self.monitor))
                             print('Epoch %05d: change learning rate from %0.5f to %0.5f'
                                   % (epoch, old_lr, K.get_value(self.model.optimizer.lr)))
             else:
