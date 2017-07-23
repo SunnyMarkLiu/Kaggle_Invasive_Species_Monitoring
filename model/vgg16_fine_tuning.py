@@ -19,12 +19,12 @@ from keras import backend as K
 from keras.utils import plot_model
 from sklearn.metrics import roc_auc_score
 # from keras.callbacks import LearningRateScheduler
-from keras.callbacks import ModelCheckpoint
 import keras
 from utils import data_util
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from conf.configure import Configure
+from utils.keras_utils import ModelCheckpointAndLearningRateDecay
 
 
 def main():
@@ -85,16 +85,17 @@ def main():
             yield batch_x, batch_y
 
     earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
-    checkpoint = ModelCheckpoint(Configure.vgg16_best_model_weights,
-                                 monitor='val_loss', verbose=1,
-                                 save_best_only=True, mode='min')
+    checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.vgg16_best_model_weights,
+                                                              lr_decay=0.9,
+                                                              monitor='val_loss', verbose=1,
+                                                              save_best_only=True, mode='min')
 
     model.fit_generator(
         data_generator(gen_batch_size=batch_size),
         steps_per_epoch=train_X.shape[0] // batch_size,
         epochs=epochs, verbose=1,
         validation_data=(validate_X, validate_y),
-        callbacks=[earlystop, checkpoint]
+        callbacks=[earlystop, checkpoint_lr_decay]
     )
 
     print '============ load weights ============'
@@ -105,8 +106,7 @@ def main():
     print 'validate roc_auc_score =', val_roc
 
     print '========== start predicting =========='
-    # predict
-    # all test data
+    # load all all test data
     test_image_name, test_x = data_util.load_test_data(image_size)
     test_data_wapper = data_util.DataWapper(test_x, istrain=False)
     test_x, _ = test_data_wapper.load_all_data()
@@ -117,6 +117,7 @@ def main():
                                'invasive': predict})
     predict_df = predict_df[['name', 'invasive']]
     predict_df.to_csv(Configure.submission_path, index=False)
+
 
 if __name__ == '__main__':
     main()
