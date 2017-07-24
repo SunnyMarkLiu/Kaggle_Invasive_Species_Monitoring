@@ -2,6 +2,8 @@
 # _*_ coding: utf-8 _*_
 
 """
+vgg19 model fine tuning
+
 @author: MarkLiu
 @time  : 17-7-23 上午8:28
 """
@@ -116,7 +118,7 @@ def main():
     predict_df = pd.DataFrame({'name': test_image_name,
                                'invasive': predict})
     predict_df = predict_df[['name', 'invasive']]
-    predict_df.to_csv(Configure.submission_path.format('vgg16'), index=False)
+    predict_df.to_csv(Configure.submission_path.format('vgg19'), index=False)
 
 
 if __name__ == '__main__':
