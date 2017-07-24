@@ -49,7 +49,7 @@ def main():
     image_input = Input(shape=input_shape)
     model = applications.VGG16(weights='imagenet', include_top=False, input_tensor=image_input)
     print('Model loaded.')
-    for layer in model.layers[:-2]:
+    for layer in model.layers[0:3]:
         print 'frozen layer', layer
         layer.trainable = False
 
@@ -117,7 +117,7 @@ def main():
     predict_df = pd.DataFrame({'name': test_image_name,
                                'invasive': predict})
     predict_df = predict_df[['name', 'invasive']]
-    predict_df.to_csv(Configure.submission_path, index=False)
+    predict_df.to_csv(Configure.submission_path.format('vgg16'), index=False)
 
 
 if __name__ == '__main__':

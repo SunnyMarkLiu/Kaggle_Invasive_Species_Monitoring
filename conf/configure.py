@@ -40,4 +40,5 @@ class Configure(object):
     vgg19_best_model_weights = '../result/vgg19_best_model_weights.hdf5'
 
     # result
-    submission_path = '../result/submission_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S', time.localtime(time.time())))
+    submission_path = '../result/submission_{}_by_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S',
+                                                                               time.localtime(time.time())), '{}')
