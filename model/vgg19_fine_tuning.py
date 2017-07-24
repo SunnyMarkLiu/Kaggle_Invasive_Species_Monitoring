@@ -83,7 +83,7 @@ def main():
             batch_x, batch_y = train_data_wapper.next_batch(gen_batch_size)
             yield batch_x, batch_y
 
-    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
     checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.vgg19_best_model_weights,
                                                               lr_decay=0.9,
                                                               monitor='val_loss', verbose=0,
