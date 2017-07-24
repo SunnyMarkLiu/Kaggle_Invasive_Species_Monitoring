@@ -2,6 +2,8 @@
 # _*_ coding: utf-8 _*_
 
 """
+vgg16 model fine tuning
+
 @author: MarkLiu
 @time  : 17-7-16 下午2:11
 """
