@@ -49,15 +49,15 @@ def main():
     image_input = Input(shape=input_shape)
     model = applications.VGG16(weights='imagenet', include_top=False, input_tensor=image_input)
     print('Model loaded.')
-    for layer in model.layers:
+    for layer in model.layers[:-2]:
         print 'frozen layer', layer
         layer.trainable = False
 
     # build a classifier model to put on top of the convolutional model
     top_model = Flatten(name='flatten')(model.output)
-    top_model = Dense(256, activation='relu', name='fc1', kernel_regularizer=regularizers.l2(5e-4))(top_model)
+    top_model = Dense(256, activation='relu', name='fc1', kernel_regularizer=regularizers.l2(5e-3))(top_model)
     top_model = Dropout(0.5)(top_model)
-    top_model = Dense(256, activation='relu', name='fc2', kernel_regularizer=regularizers.l2(5e-4))(top_model)
+    top_model = Dense(256, activation='relu', name='fc2', kernel_regularizer=regularizers.l2(5e-3))(top_model)
     top_model = Dropout(0.5)(top_model)
     top_model = Dense(1, activation='sigmoid', name='predictions')(top_model)
 
@@ -84,7 +84,7 @@ def main():
             batch_x, batch_y = train_data_wapper.next_batch(gen_batch_size)
             yield batch_x, batch_y
 
-    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
     checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.vgg16_best_model_weights,
                                                               lr_decay=0.9,
                                                               monitor='val_loss', verbose=0,
