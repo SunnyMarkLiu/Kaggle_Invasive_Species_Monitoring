@@ -86,17 +86,7 @@ def do_aug_train_image(image_size):
 
 
 def main():
-    print 'augment train label 0 data...'
-    src_path = Configure.trainable_train_labels_0_img_path.format(224)
-    dest_img_dir = src_path + 'image_augmentation/'
-    aug_train_image(src_path, dest_img_dir)
-    print 'generate {} train label 0 data'.format(len(os.listdir(dest_img_dir)))
-
-    print 'augment train label 1 data...'
-    src_path = Configure.trainable_train_labels_1_img_path.format(224)
-    dest_img_dir = src_path + 'image_augmentation/'
-    aug_train_image(src_path, dest_img_dir)
-    print 'generate {} train label 1 data'.format(len(os.listdir(dest_img_dir)))
+    do_aug_train_image(224)
 
 
 if __name__ == '__main__':
