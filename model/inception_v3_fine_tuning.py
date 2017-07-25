@@ -16,7 +16,7 @@ from keras.layers import Input, Dropout, Flatten, Dense
 from keras import optimizers, regularizers
 from keras import applications
 from keras import backend as K
-from keras.utils import plot_model
+# from keras.utils import plot_model
 from sklearn.metrics import roc_auc_score
 # from keras.callbacks import LearningRateScheduler
 import keras
@@ -56,8 +56,10 @@ def main():
     model = applications.InceptionV3(weights='imagenet', include_top=False, input_tensor=image_input)
     print('Model loaded.')
     for layer in model.layers:
-        print 'frozen layer', layer
-        layer.trainable = False
+        layer_name = str(layer)
+        if ('Conv2D' not in layer_name) and ('BatchNormalization' not in layer_name):
+            print 'unfrozen layer', layer_name
+            layer.trainable = False
 
     # build a classifier model to put on top of the convolutional model
     top_model = Flatten(name='flatten')(model.output)
