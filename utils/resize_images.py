@@ -42,6 +42,33 @@ def resize_images(image_dir, image_size, target='train', label=None):
         cv2.imwrite(save_dir + image_name, img)
 
 
+def do_resize_images(image_size):
+    print('perform image reseize...')
+
+    print 'resize train images label 0...'
+    save_dir = Configure.trainable_train_labels_0_img_path.format(image_size)
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    if len(os.listdir(save_dir)) == 0:
+        resize_images(Configure.train_labels_0_img_path, image_size, 'train', label=0)
+
+    print 'resize train images label 1...'
+    save_dir = Configure.trainable_train_labels_1_img_path.format(image_size)
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    if len(os.listdir(Configure.trainable_train_labels_1_img_path.format(image_size))) == 0:
+        resize_images(Configure.train_labels_1_img_path, image_size, 'train', label=1)
+
+    print 'resize test images...'
+    save_dir = Configure.testable_test_img_path.format(image_size)
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    if len(os.listdir(Configure.testable_test_img_path.format(image_size))) == 0:
+        resize_images(Configure.test_img_path, image_size, 'test')
+
+    print('Done!')
+
+
 def main():
     print('perform image reseize...')
     image_size = Configure.vgg_image_size

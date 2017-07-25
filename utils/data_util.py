@@ -13,9 +13,10 @@ sys.path.append(module_path)
 from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing import image
 import numpy as np
-from tqdm import tqdm
 
 from conf.configure import Configure
+from utils import resize_images
+from utils import image_augmentation as img_aug
 
 
 def load_train_data(image_size):
@@ -23,6 +24,11 @@ def load_train_data(image_size):
     train_x = []
 
     base_path = Configure.trainable_train_labels_0_img_path.format(image_size) + 'image_augmentation/'
+    # 该 image_size 的图片不存在
+    if not os.path.exists(base_path):
+        resize_images.do_resize_images(image_size)
+        img_aug.do_aug_train_image(image_size)
+
     images = os.listdir(base_path)
     images = [base_path + img for img in images]
     train_x.extend(images)

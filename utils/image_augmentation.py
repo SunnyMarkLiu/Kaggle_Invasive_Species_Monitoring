@@ -18,8 +18,10 @@ from conf.configure import Configure
 
 
 def aug_train_image(src_img_dir, dest_img_dir):
-
     image_names = os.listdir(src_img_dir)
+
+    if not os.path.exists(dest_img_dir):
+        os.mkdir(dest_img_dir)
 
     for i in tqdm(range(len(image_names))):
         image_name = image_names[i]
@@ -68,8 +70,22 @@ def aug_train_image(src_img_dir, dest_img_dir):
         save_path = dest_img_dir + 'aug_flip_vertical_' + image_name
         cv2.imwrite(save_path, res)
 
-def main():
 
+def do_aug_train_image(image_size):
+    print 'augment train label 0 data...'
+    src_path = Configure.trainable_train_labels_0_img_path.format(image_size)
+    dest_img_dir = src_path + 'image_augmentation/'
+    aug_train_image(src_path, dest_img_dir)
+    print 'generate {} train label 0 data'.format(len(os.listdir(dest_img_dir)))
+
+    print 'augment train label 1 data...'
+    src_path = Configure.trainable_train_labels_1_img_path.format(image_size)
+    dest_img_dir = src_path + 'image_augmentation/'
+    aug_train_image(src_path, dest_img_dir)
+    print 'generate {} train label 1 data'.format(len(os.listdir(dest_img_dir)))
+
+
+def main():
     print 'augment train label 0 data...'
     src_path = Configure.trainable_train_labels_0_img_path.format(224)
     dest_img_dir = src_path + 'image_augmentation/'
@@ -81,6 +97,7 @@ def main():
     dest_img_dir = src_path + 'image_augmentation/'
     aug_train_image(src_path, dest_img_dir)
     print 'generate {} train label 1 data'.format(len(os.listdir(dest_img_dir)))
+
 
 if __name__ == '__main__':
     main()
