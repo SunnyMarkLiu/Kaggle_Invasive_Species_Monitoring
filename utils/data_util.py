@@ -66,12 +66,14 @@ def load_test_data(image_size):
 
 
 class DataWapper(object):
-    def __init__(self, x, y=None, istrain=False):
+    def __init__(self, x, target_size_x, target_size_y, y=None, istrain=False):
         self.x = x
         self.istrain = istrain
         self.y = y
         self.pointer = 0
         self.total_count = self.x.shape[0]
+        self.target_size_x = target_size_x
+        self.target_size_y = target_size_y
 
     def shuffle(self):
         shuffled_index = np.arange(0, self.total_count)
@@ -96,7 +98,7 @@ class DataWapper(object):
 
         x = []
         for img_path in batch_x:
-            img = image.load_img(img_path, target_size=(224, 224))
+            img = image.load_img(img_path, target_size=(self.target_size_x, self.target_size_y))
             img = image.img_to_array(img)
             img = np.expand_dims(img, axis=0)
             img = preprocess_input(img)

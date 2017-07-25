@@ -30,7 +30,7 @@ from utils.keras_utils import ModelCheckpointAndLearningRateDecay
 
 
 def main():
-    image_size = 224
+    image_size = Configure.vgg_image_size
     # all train data
     train_x_image_path, train_y = data_util.load_train_data(image_size=image_size)
     # split train/validate
@@ -38,13 +38,19 @@ def main():
                                                                 train_y,
                                                                 test_size=0.1,
                                                                 random_state=0)
-    train_data_wapper = data_util.DataWapper(train_X, train_y, istrain=True)
-    validate_data_wapper = data_util.DataWapper(validate_X, validate_y, istrain=True)
+    train_data_wapper = data_util.DataWapper(x=train_X, y=train_y,
+                                             target_size_x=image_size,
+                                             target_size_y=image_size,
+                                             istrain=True)
+    validate_data_wapper = data_util.DataWapper(x=validate_X, y=validate_y,
+                                                target_size_x=image_size,
+                                                target_size_y=image_size,
+                                                istrain=True)
 
     if K.image_data_format() == 'channels_first':  # theano
-        input_shape = (3, 224, 224)
+        input_shape = (3, image_size, image_size)
     else:  # tensorflow
-        input_shape = (224, 224, 3)
+        input_shape = (image_size, image_size, 3)
 
     print 'built vgg19 model'
     image_input = Input(shape=input_shape)
@@ -110,7 +116,10 @@ def main():
     print '========== start predicting =========='
     # load all all test data
     test_image_name, test_x = data_util.load_test_data(image_size)
-    test_data_wapper = data_util.DataWapper(test_x, istrain=False)
+    test_data_wapper = data_util.DataWapper(test_x,
+                                            target_size_x=image_size,
+                                            target_size_y=image_size,
+                                            istrain=False)
     test_x, _ = test_data_wapper.load_all_data()
 
     predict = model.predict(test_x, batch_size=100, verbose=1)
