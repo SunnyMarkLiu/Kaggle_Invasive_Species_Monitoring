@@ -74,8 +74,8 @@ def main():
     model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
-    print(model.summary())
-    plot_model(model, to_file='inception_v3_model.png')
+    # print(model.summary())
+    # plot_model(model, to_file='inception_v3_model.png')
 
     print '========== start training =========='
     print 'training data size: ', train_X.shape[0]
