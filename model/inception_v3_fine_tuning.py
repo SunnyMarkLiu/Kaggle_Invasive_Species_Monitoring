@@ -58,7 +58,7 @@ def main():
     for layer in model.layers:
         layer_name = str(layer)
         if ('Conv2D' not in layer_name) and ('BatchNormalization' not in layer_name):
-            print 'unfrozen layer', layer_name
+            print 'frozen layer', layer_name
             layer.trainable = False
 
     # build a classifier model to put on top of the convolutional model

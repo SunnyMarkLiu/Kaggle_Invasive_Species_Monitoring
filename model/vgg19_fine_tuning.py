@@ -56,9 +56,11 @@ def main():
     image_input = Input(shape=input_shape)
     model = applications.VGG19(weights='imagenet', include_top=False, input_tensor=image_input)
     print('Model loaded.')
-    for layer in model.layers[0:3]:
-        print 'frozen layer', layer
-        layer.trainable = False
+    for layer in model.layers:
+        layer_name = str(layer)
+        if 'Conv2D' not in layer_name:
+            print 'frozen layer', layer_name
+            layer.trainable = False
 
     # build a classifier model to put on top of the convolutional model
     top_model = Flatten(name='flatten')(model.output)
