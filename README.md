@@ -5,6 +5,7 @@ Kaggle Competition: [Invasive Species Monitoring](https://www.kaggle.com/c/invas
 
 ## Contents
 - Single VGG16 fine tuning, Lb Score: 0.99176
+- Single VGG19 fine tuning, Lb Score: 0.99046
 - Single Inception V3 fine tuning, Lb Score: 0.99243
 
 ## License
