@@ -57,7 +57,8 @@ def load_train_data(image_size):
 def load_test_data(image_size):
     test_x = []
 
-    base_path = Configure.testable_test_img_path.format(image_size) + 'image_augmentation/'
+    # base_path = Configure.testable_test_img_path.format(image_size) + 'image_augmentation/'
+    base_path = Configure.testable_test_img_path.format(image_size)
     images = os.listdir(base_path)
     images = [base_path + image for image in images]
     test_x.extend(images)
