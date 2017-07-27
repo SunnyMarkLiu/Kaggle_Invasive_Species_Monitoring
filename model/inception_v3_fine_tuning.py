@@ -116,20 +116,26 @@ def main():
 
     print '========== start predicting =========='
     # load all all test data
+    print 'load all all test data...'
     test_image_name, test_x = data_util.load_test_data(image_size)
     test_data_wapper = data_util.DataWapper(test_x,
                                             target_size_x=image_size,
                                             target_size_y=image_size,
                                             istrain=False)
-
     test_x, _ = test_data_wapper.load_all_data()
-
+    print 'predict...'
     predict = model.predict(test_x, batch_size=100, verbose=1)
     predict = predict[:, 0]
     predict_df = pd.DataFrame({'name': test_image_name,
                                'invasive': predict})
+    print 'result:', predict_df.shape[0]
+    print 'average...'
+    predict_df['name'] = predict_df['name'].map(lambda n: n.split('_')[-1])
+    predict_df = predict_df.groupby('name').agg('mean').reset_index()
     predict_df = predict_df[['name', 'invasive']]
+    print 'submit test size:', predict_df.shape[0]
     predict_df.to_csv(Configure.submission_path.format('inception_v3'), index=False)
+    print 'done.'
 
 
 if __name__ == '__main__':

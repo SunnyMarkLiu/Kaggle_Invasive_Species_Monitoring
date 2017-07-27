@@ -13,6 +13,7 @@ sys.path.append(module_path)
 from keras.applications.imagenet_utils import preprocess_input
 from keras.preprocessing import image
 import numpy as np
+import pandas as pd
 
 from conf.configure import Configure
 from utils import resize_images
@@ -56,7 +57,7 @@ def load_train_data(image_size):
 def load_test_data(image_size):
     test_x = []
 
-    base_path = Configure.testable_test_img_path.format(image_size)
+    base_path = Configure.testable_test_img_path.format(image_size) + 'image_augmentation/'
     images = os.listdir(base_path)
     images = [base_path + image for image in images]
     test_x.extend(images)
@@ -64,6 +65,10 @@ def load_test_data(image_size):
     images_name = [name.split('/')[-1].split('.')[0] for name in images]
     return images_name, test_x
 
+
+def load_test_image_names():
+    test_submission = pd.read_csv('../result/sample_submission.csv')
+    return test_submission['name']
 
 class DataWapper(object):
     def __init__(self, x, target_size_x, target_size_y, y=None, istrain=False):
