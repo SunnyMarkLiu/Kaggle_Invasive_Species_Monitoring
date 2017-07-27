@@ -40,6 +40,7 @@ class Configure(object):
     vgg16_best_model_weights = '../result/vgg16_best_model_weights.hdf5'
     vgg19_best_model_weights = '../result/vgg19_best_model_weights.hdf5'
     inception_v3_best_model_weights = '../result/inception_v3_best_model_weights.hdf5'
+    resnet50_best_model_weights = '../result/resnet50_best_model_weights.hdf5'
 
     # result
     submission_path = '../result/submission_{}_by_{}.csv'.format(time.strftime('%Y-%m-%d_%H:%M:%S',
