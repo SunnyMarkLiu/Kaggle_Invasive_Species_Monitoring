@@ -27,7 +27,7 @@ from utils.keras_utils import ModelCheckpointAndLearningRateDecay
 
 
 def main():
-    image_size = Configure.inception_size
+    image_size = Configure.vgg_image_size
     # all train data
     train_x_image_path, train_y = data_util.load_train_data(image_size=image_size)
     # split train/validate
