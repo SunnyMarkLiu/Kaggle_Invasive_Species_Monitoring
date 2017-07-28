@@ -73,7 +73,7 @@ def main():
     # compile the model with a SGD/momentum optimizer
     # and a very slow learning rate.
     model.compile(loss='binary_crossentropy',
-                  optimizer=optimizers.Adam(lr=0.00005, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
+                  optimizer=optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
     print(model.summary())
     plot_model(model, to_file='resnet_50_model.png')
@@ -83,7 +83,7 @@ def main():
     print 'validate data size: ', validate_X.shape[0]
 
     epochs = 100
-    batch_size = 50
+    batch_size = 32
     validate_X, validate_y = validate_data_wapper.load_all_data()
 
     def data_generator(gen_batch_size):
