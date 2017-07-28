@@ -92,13 +92,19 @@ def main():
             batch_x, batch_y = train_data_wapper.next_batch(gen_batch_size)
             yield batch_x, batch_y
 
+    weights_file = Configure.inception_v3_best_model_weights
+    
     earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
-    checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(Configure.inception_v3_best_model_weights,
+    checkpoint_lr_decay = ModelCheckpointAndLearningRateDecay(weights_file,
                                                               lr_decay=0.9,
                                                               monitor='val_loss', verbose=0,
                                                               save_best_only=True, mode='min',
                                                               patience=3)
 
+    if os.path.exists(weights_file):
+        model.load_weights(weights_file)
+        print("Model loaded.")
+    
     model.fit_generator(
         data_generator(gen_batch_size=batch_size),
         steps_per_epoch=train_X.shape[0] // batch_size,
@@ -108,7 +114,7 @@ def main():
     )
 
     print '============ load weights ============'
-    model.load_weights(Configure.inception_v3_best_model_weights)
+    model.load_weights(weights_file)
     print '========== start validating =========='
     predict = model.predict(validate_X, batch_size=100, verbose=1)
     val_roc = roc_auc_score(validate_y, predict)
